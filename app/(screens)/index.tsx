@@ -27,7 +27,7 @@ export default function HomeScreen() {
   const fetchBooks = async (query: string) => {
     try {
       setError(null);
-      const response = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=10`);
+      const response = await fetch(`https://openlibrary.org/search.json?q=${query}&fields=key,title,author_name&limit=10`);
       
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
