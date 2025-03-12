@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Book } from '@/types'
+import { Book } from '@/types';
+import { BookItem } from '@/components/BookItem';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,17 +48,7 @@ export default function HomeScreen() {
       <FlatList
         data={books}
         keyExtractor={(item) => item.key}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.bookItem}
-            onPress={() => router.push({ pathname: '/(screens)/detail', params: { bookId: item.key } })}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={styles.bookTitle}>{item.title}</Text>
-              <Text style={styles.bookAuthor}>{item.author_name?.join(', ') || 'Unknown Author'}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => <BookItem book={item} onPress={() => router.push({ pathname: '/(screens)/detail', params: { bookId: item.key } })}/>}
       />
     </View>
   );
@@ -68,10 +59,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   input: { borderWidth: 1, padding: 10, borderRadius: 5, marginBottom: 10 },
   error: { color: 'red', marginBottom: 10 },
-  bookItem: { flexDirection: 'row', alignItems: 'center', padding: 10, borderBottomWidth: 1 },
   bookCover: { width: 50, height: 75, marginRight: 10 },
-  bookTitle: { fontSize: 16, fontWeight: 'bold' },
-  bookAuthor: { color: 'gray' },
   bookYear: { color: 'blue' },
   bookRating: { color: 'green' },
 });
