@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-
-interface Book {
-  key: string;
-  title: string;
-  author_name?: string[];
-  cover_i?: number;
-  first_publish_year?: number;
-}
+import { Book } from '@/types'
 
 export default function HomeScreen() {
   const router = useRouter();

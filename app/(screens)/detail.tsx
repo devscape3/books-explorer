@@ -1,15 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { useEffect, useState } from 'react';
-
-interface BookDetail {
-  title: string;
-  by_statement?: string;
-  description?: { value: string } | string;
-  covers?: number[];
-  publish_date?: string;
-  authors?: { name: string }[];
-}
+import { BookDetail } from '@/types';
 
 export default function DetailScreen() {
   const { bookId } = useLocalSearchParams();
