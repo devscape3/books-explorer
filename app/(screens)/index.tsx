@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const fetchBooks = async (query: string) => {
     try {
       setError(null);
-      const response = await fetch(`https://openlibrary.org/search.json?q=${query}&fields=key,title,author_name&limit=10`);
+      const response = await fetch(`https://openlibrary.org/search.json?q=${query}&fields=key,title,author_name,first_publish_year&limit=10`);
       
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
@@ -48,7 +48,7 @@ export default function HomeScreen() {
       <FlatList
         data={books}
         keyExtractor={(item) => item.key}
-        renderItem={({ item }) => <BookItem book={item} onPress={() => router.push({ pathname: '/(screens)/detail', params: { bookId: item.key } })}/>}
+        renderItem={({ item }) => <BookItem book={item} onPress={() => router.push({ pathname: '/(screens)/detail', params: { book : JSON.stringify(item) } })}/>}
       />
     </View>
   );
