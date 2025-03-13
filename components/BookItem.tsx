@@ -11,7 +11,7 @@ export const BookItem = ({ book, onPress }: { book: Book; onPress: () => void })
   );
 
   const styles = StyleSheet.create({
-    bookTitle: { fontSize: 16, fontWeight: 'bold' },
-    bookAuthor: { color: 'gray' },
-    bookItem: { flexDirection: 'row', alignItems: 'center', padding: 10, borderBottomWidth: 1 },
+    bookTitle: { fontSize: 16, fontWeight: 500, color: '#2FB78E', lineHeight: 16 * 1.5 },
+    bookAuthor: { fontSize: 14, fontWeight: 400, color: '#9D9D9D', lineHeight: 14 * 1.5 },
+    bookItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
   });

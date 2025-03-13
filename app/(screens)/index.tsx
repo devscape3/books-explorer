@@ -55,9 +55,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff', fontFamily: 'Roboto' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  input: { borderWidth: 1, padding: 10, borderRadius: 5, marginBottom: 10 },
+  input: { borderWidth: 1, paddingTop: 12, paddingBottom: 12, paddingRight: 16, paddingLeft: 16, borderRadius: 8, marginBottom: 10, backgroundColor: '#FAFAFA', borderColor: '#E8E8E8' },
   error: { color: 'red', marginBottom: 10 },
   bookCover: { width: 50, height: 75, marginRight: 10 },
   bookYear: { color: 'blue' },
