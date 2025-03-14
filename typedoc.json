@@ -1,0 +1,13 @@
+{
+    "entryPoints": [
+        "api/books.ts"
+    ],
+    "out": "docs",
+    "exclude": [
+        "**/__tests__/**",
+        "**/node_modules/**"
+    ],
+    "excludePrivate": false,
+    "excludeExternals": true,
+    "tsconfig": "tsconfig.json"
+}

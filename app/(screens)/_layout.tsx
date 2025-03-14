@@ -1,40 +1,41 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
-import { useExpoRouter } from 'expo-router/build/global-state/router-store';
-import React from 'react';
-import { StyleProp, TextStyle, TouchableOpacity } from 'react-native';
+import { StyleProp, TextStyle } from 'react-native';
+import { Stack, router } from 'expo-router';
 
-export default function TabLayout() {
-  const router = useExpoRouter();
+import { TouchableIcon } from '@/components/TouchableIcon';
+
+export default function MainLayout() {
   return (
     <Stack screenOptions={{
-      headerStyle: {
-        backgroundColor: '#fff',
-      },
+      headerStyle: headerStyle,
+      animation: "slide_from_right", // TODO: must use smooth transition
+      gestureEnabled: true,
       headerTitleAlign: 'center',
       headerTitleStyle: headerTitleStyle,
       headerShadowVisible: false,
       headerLeft: ({ canGoBack }) =>
         canGoBack ? (
-          <TouchableOpacity onPress={() => router.goBack() /*navigation.goBack()*/} style={{ padding: 10 }}>
-            <Ionicons name="arrow-back" size={20} color="#19191B" />
-          </TouchableOpacity>
+          <TouchableIcon ionicIconName='arrow-back' onPress={() => router.back()} />
         ) : null,
-      headerRight: () => (
-        <TouchableOpacity onPress={() => alert('Search Pressed')} style={{ padding: 10 }}>
-          <Ionicons name="search" size={20} color="#19191B" />
-        </TouchableOpacity>
-      ),
+      // takes you back to search screen, TODO: may be used to search from book details.
+      headerRight: ({ canGoBack }) =>
+        canGoBack ? (
+          <TouchableIcon ionicIconName='search' onPress={() => router.back()} />
+        ) : null,
     }}>
       <Stack.Screen name="index" options={{ title: "Search Books" }} />
-      <Stack.Screen name="detail" options={{ title: "Book Details" }} />
+      <Stack.Screen name="detail" options={{ title: "", presentation: "modal" }} />
     </Stack>
   );
 }
 
-const headerTitleStyle:StyleProp<Pick<TextStyle, "fontFamily" | "fontSize" | "fontWeight"> & { color?: string | undefined; }> = {
+// customize header title here
+const headerTitleStyle: StyleProp<Pick<TextStyle, "fontFamily" | "fontSize" | "fontWeight"> & { color?: string | undefined; }> = {
   fontFamily: 'Helvetica',
   fontWeight: 400,
   fontSize: 18,
   color: '#121212'
+}
+
+const headerStyle = {
+  backgroundColor: '#fff',
 }

@@ -1,108 +1,64 @@
-import { useLocalSearchParams } from 'expo-router';
-import { Text, Image, ScrollView, StyleSheet, View } from 'react-native';
-import { useEffect, useState } from 'react';
-import { Author, Book, BookDetail } from '@/types';
+import { useLocalSearchParams } from "expo-router";
+import { Text, Image, ScrollView, StyleSheet, View, ActivityIndicator } from "react-native";
+import { useBookDetails } from "@/hooks/useBookDetails";
+import { Doc } from "@/types/open-library/query";
+import { StarRating } from "@/components/StarRating";
+import { BookReviews } from "@/components/BookReviews";
+import { BookOverview } from "@/components/BookOverview";
+import { Authors } from "@/components/Authors";
 
+/**
+ * Details Screen
+ * 
+ * Details of a work are shown here
+ * Pressing back or search icon takes back to the Main Screen.
+ */
 export default function DetailScreen() {
-  const { book: bookJSON } = useLocalSearchParams();
-  const book: Book = JSON.parse(bookJSON as string);
-  const [bookDetail, setBookDetail] = useState<BookDetail | null>(null);
-  const [authors, setAuthors] = useState<Author[]>([]);
-  const [rating, setRating] = useState<{ average: string; count: string } | null>(null);
+  const { docJSON } = useLocalSearchParams();
+  const doc: Doc = JSON.parse(docJSON as string);
+  const { bookDetail, authors, rating, reviews } = useBookDetails(doc.key);
 
-  useEffect(() => {
-    if (!book.key) return;
-
-    const fetchBookDetails = async () => {
-      try {
-        const response = await fetch(`https://openlibrary.org${book.key}.json`);
-        const data = await response.json();
-        setBookDetail(data);
-
-        // Fetch author details
-        if (data.authors) {
-          const authorDetails = await Promise.all(
-            data.authors.map(async (author: any) => {
-              const res = await fetch(`https://openlibrary.org${author.author.key}.json`);
-              return res.json();
-            })
-          );
-          setAuthors(authorDetails);
-        }
-
-        // Fetch book rating
-        const ratingResponse = await fetch(`https://openlibrary.org${book.key}/ratings.json`);
-        const ratingData = await ratingResponse.json();
-        setRating({
-          average: ratingData.summary?.average || 'N/A',
-          count: ratingData.summary?.count || '0',
-        });
-      } catch (error) {
-        console.error('Error fetching book details:', error);
-      }
-    };
-
-    fetchBookDetails();
-  }, [book.key]); // ✅ Only re-run when `book.key` changes
-
-  if (!bookDetail) return <Text style={styles.loading}>Loading...</Text>;
-
+  // Show Activity Indicator while loading
+  if (!bookDetail)
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#19191B" />
+      </View>
+    );
+  const bookCoverUri = bookDetail.covers?.[0]
+    ? { uri: `https://covers.openlibrary.org/b/id/${bookDetail.covers[0]}-L.jpg` }
+    : require("@/assets/images/emptybook.jpeg");
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {bookDetail.covers?.[0] && (
-        <Image
-          source={{ uri: `https://covers.openlibrary.org/b/id/${bookDetail.covers[0]}-L.jpg` }}
-          style={styles.bookCover}
-        />
-      )}
+      <Image source={bookCoverUri} style={styles.bookCover} />
       <Text style={styles.title}>{bookDetail.title}</Text>
-      <Text style={styles.authorName}>{authors.map((author) => author.name).join(",")}</Text>
-      <Text style={styles.published}>Published in {book.first_publish_year || 'N/A'}</Text>
-      <Text style={styles.rating}>
-        {rating?.average && !isNaN(parseFloat(rating.average)) 
-          ? '⭐'.repeat(Math.round(parseFloat(rating.average))) + ` ${parseFloat(rating.average).toFixed(1)}` 
-          : 'N/A'} 
-        ({rating?.count} reviews)
-      </Text>
-      {/* ✅ Author Section */}
-      {authors.length > 0 && (
-        <View style={styles.authorSection}>
-          <Text style={styles.authorTitle}>About the author</Text>
-          {authors.map((author) => (
-            <View key={author.key} style={styles.authorBox}>
-              
-              <Text style={styles.bio}>
-                {typeof author.bio === 'string' ? author.bio : author.bio?.value || 'No biography available.'}
-              </Text>
-            </View>
-          ))}
-        </View>
+      <Text style={styles.authorNames}>{authors.map((author) => author.name).join(", ")}</Text>
+      {
+        doc.first_publish_year && <Text style={styles.published}>Published in {doc.first_publish_year || "N/A"}</Text>
+      }
+      {/* Rating */}
+      {rating?.average && !isNaN(parseFloat(rating.average)) ? (
+        <StarRating rating={parseFloat(rating.average)} reviews={rating.count?.toString() ?? '0'} />
+      ) : (
+        true && <Text style={styles.rating}></Text>
       )}
-
-      {/* ✅ Description */}
-      <View style={styles.authorSection}>
-        <Text style={styles.authorTitle}>Overview</Text>
-        <Text style={styles.description}>
-          {typeof bookDetail.description === 'string' ? bookDetail.description : bookDetail.description?.value || 'No description available.'}
-        </Text>
-      </View>
+      <Authors authors={authors} />
+      <BookOverview bookDetail={bookDetail} />
+      <BookReviews reviews={reviews} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', fontFamily: 'Helvetica' },
-  content: { padding: 20, alignItems: 'center' },
-  bookCover: { width: 150, height: 220, marginBottom: 20, borderRadius: 10 },
-  title: { fontSize: 18, fontWeight: 700, color: '#19191B', textAlign: 'center', marginBottom: 10 },
-  published: {fontFamily: 'Helvetica', color: '#9D9D9D', fontWeight: 400, fontSize: 16},
-  rating: { fontSize: 13, fontWeight: 400, color: '#19191B', textAlign: 'center', marginBottom: 10 },
-  description: { marginTop: 10, fontSize: 14, fontWeight: 400,color: '#9D9D9D', textAlign: 'justify', lineHeight: 22 },
-  loading: { textAlign: 'center', fontSize: 18, marginTop: 20 },
-  authorSection: { marginTop: 20, width: '100%' },
-  authorTitle: { fontSize: 18, fontWeight: '700', marginBottom: 5 },
-  authorBox: { marginBottom: 10, padding: 10, borderRadius: 5 },
-  author: { fontSize: 16, fontWeight: 'bold' },
-  authorName: {fontFamily: 'Helvetica', color: '#9D9D9D', fontWeight: 400, fontSize: 16},
-  bio: { fontSize: 14, fontWeight: 400, color: '#9D9D9D', marginTop: 5 },
+  container: { flex: 1, backgroundColor: "#fff", fontFamily: "Helvetica" },
+  content: { paddingTop: 4, paddingRight: 30, paddingLeft: 30, paddingBottom: 30, alignItems: "center" },
+  bookCover: { width: 196, height: 300, marginBottom: 20, borderRadius: 10 },
+  title: { fontSize: 18, fontWeight: "700", color: "#19191B", textAlign: "center", marginBottom: 10 },
+  authorNames: { color: "#9D9D9D", fontWeight: "400", fontSize: 16 },
+  published: { marginTop: 6, marginBottom: 6, color: "#9D9D9D", fontWeight: "400", fontSize: 16 },
+  rating: { marginTop: 6, fontSize: 18, fontWeight: "500", color: "#19191B", textAlign: "center", marginBottom: 10 },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
+  section: { marginTop: 8, width: "100%" },
+  subTitle: { fontSize: 18, fontWeight: "700", marginBottom: 3 },
+  text: { fontSize: 14, fontWeight: "400", color: "#9D9D9D", marginTop: 0 },
 });

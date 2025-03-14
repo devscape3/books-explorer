@@ -7,7 +7,13 @@ node_modules/
 .expo/
 dist/
 web-build/
+coverage/
+docs/
+__snapshots__/
+android/
 expo-env.d.ts
+constants/Keys.ts
+books-product.yaml
 
 # Native
 *.orig.*

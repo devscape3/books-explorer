@@ -8,7 +8,7 @@ export interface Book {
 export interface BookDetail {
   title: string;
   covers?: number[];
-  authors?: { key: string; name: string }[];
+  authors?: { "author": { key: string; name: string } }[];
   description?: { value: string } | string;
 }
 
