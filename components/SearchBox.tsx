@@ -59,16 +59,16 @@ const styles = StyleSheet.create({
         borderColor: "#E8E8E8",
         backgroundColor: "#FAFAFA",
         borderRadius: 8,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-        marginBottom: 10,
+        marginBottom: 12,
 
     },
     icon: {
-        marginRight: 4,
-        paddingHorizontal: 4
+        height : 24,
+        width : 24,
+        marginHorizontal : 12
     },
     input: {
+        height : 48,
         flex: 1,
         fontSize: 16,
         textDecorationLine: 'none', // Ensure no underline

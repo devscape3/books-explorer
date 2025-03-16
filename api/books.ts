@@ -40,15 +40,16 @@ export function checkResponse(response: Response, errorMessage:string) {
 
 export const fetchBooks = async (query: string, fields: string[] = ['key', 'title', 'author_name', 'first_publish_year'], limit:number = 10): Promise<Doc[]> => {
     try {
-        //const fieldsString = fields.join(",");
-        //const response = await fetch(`https://openlibrary.org/search.json?q=${query}&fields=${fieldsString}&limit=${limit}`);
-        const response = await fetch(`https://openlibrary.org/search.json?q=${query}&limit=${limit}`);
+        //efficiency
+        //getting all the fields takes so much time
+        const fieldsString = fields.join(",");
+        const response = await fetch(`https://openlibrary.org/search.json?q=${query.trim()}&fields=${fieldsString}&limit=${limit}`);
         checkResponse(response, "Invalid API response. Try again later.")
         const data = await response.json();
         return data.docs;
     } catch (error:any) {
         //console.error("Error fetching books:", error);
-        throw new Error(error.message + "Error fetching books. Please try again later.");
+        throw error; // new Error(error.message + "Error fetching books. Please try again later.");
     }
 };
 

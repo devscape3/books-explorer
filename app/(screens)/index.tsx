@@ -2,33 +2,38 @@ import { useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { BookItem } from "@/components/BookItem";
-// TODO: refactor fetchBooks to fetchDocs
 import { fetchBooks as fetchDocs } from "@/api/books";
 import { Doc } from "@/types/open-library/query";
 import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
 import { SearchBox } from "@/components/SearchBox";
-
-/**
- * Home Screen
- * 
- * Dynamically Search the books by book names or author names.
- * Taping the result list item takes to Details Screen.
- */
+import ActivityIndicator from "@/components/ActivityIndicator";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  // open library organized the books as docs, a doc my contain many editions
-  const [docs, setDocs] = useState<Doc[]>([]);
+  const [docs, setDocs] = useState<Doc[] | null>(null); // Start as null to differentiate between initial state and empty results
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Debounced effect to call fetchBooks only after 500ms
   useDebouncedEffect(() => {
+    setError(null);
+
     if (search.length >= 3) {
-      setError("")
+      setLoading(true);
       fetchDocs(search)
-        .then(setDocs)
-        .catch(() => setError("Error fetching books. Please try again later."));
+        .then((results) => {
+          setDocs(results.length > 0 ? results : []); // Explicitly set empty array only when API call completes
+        })
+        .catch((e: Error) => {
+          setError(e.message);
+          setDocs(null); // Reset docs on error
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setDocs(null); // Reset docs to initial state
+      setLoading(false);
     }
   }, [search], 500);
 
@@ -44,23 +49,24 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <SearchBox value={search} onChange={setSearch} placeholder="Book title or author" />
-      {error && <Text style={styles.error}>{error}</Text>}
-      <FlatList data={docs} keyExtractor={(item) => item.key} renderItem={renderBookItem} />
+
+      {search.length < 3 ? (
+        <Text style={styles.message}>Please enter at least 3 letters.</Text>
+      ) : loading ? (
+        <ActivityIndicator />
+      ) : error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : docs && docs.length > 0 ? (
+        <FlatList data={docs} keyExtractor={(item) => item.key} renderItem={renderBookItem} />
+      ) : docs !== null ? (
+        <Text style={styles.message}>No results found. Try a different search.</Text>
+      ) : null}
     </View>
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 4, paddingRight: 30, paddingLeft: 30, paddingBottom: 30, backgroundColor: "#fff", fontFamily: "Roboto" },
-  input: {
-    borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: "#FAFAFA",
-    borderColor: "#E8E8E8",
-  },
+  container: { flex: 1, padding: 30, backgroundColor: "#fff" },
   error: { color: "red", marginBottom: 10 },
+  message: { textAlign: "center", marginTop: 20, fontSize: 16, color: "gray" },
 });
